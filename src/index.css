@@ -146,17 +146,20 @@ html, body, #root {
 }
 
 .navbar-brand-logo {
-  height: 56px;
+  height: 72px;
   width: auto;
-  max-width: 140px;
+  max-width: 190px;
   object-fit: contain;
   display: block;
+  /* The logo PNG is black-on-white; multiply drops the white box so only the
+     lotus + wordmark sit cleanly on the sunlit background. */
+  mix-blend-mode: multiply;
 }
 
 @media (max-width: 768px) {
   .navbar-brand-logo {
-    height: 42px;
-    max-width: 110px;
+    height: 52px;
+    max-width: 140px;
   }
 }
 
