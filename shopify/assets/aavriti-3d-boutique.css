@@ -1,0 +1,516 @@
+/* ==========================================================================
+   AAVRITI 3D BOUTIQUE - SHOPIFY LIQUID STYLESHEET
+   Compatible with Shopify OS 2.0 & All Modern Shopify Themes
+   ========================================================================== */
+
+:root {
+  --aavriti-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --aavriti-font-serif: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+  --aavriti-text-primary: #121212;
+  --aavriti-text-secondary: #5a5a5a;
+  --aavriti-text-muted: #8e8e8e;
+  --aavriti-border: rgba(0, 0, 0, 0.08);
+  --aavriti-bg-panel: rgba(255, 255, 255, 0.72);
+}
+
+.aavriti-boutique-section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 640px;
+  overflow: hidden;
+  background-color: #f7f6f2;
+  font-family: var(--aavriti-font-sans);
+  color: var(--aavriti-text-primary);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Background Scene Image with Soft Sunlight Vignette */
+.aavriti-bg-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.aavriti-bg-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 38%;
+  filter: saturate(1.04) brightness(1.02);
+}
+
+.aavriti-bg-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.05) 0%, rgba(246, 244, 240, 0.22) 100%),
+              linear-gradient(to right, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 35%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, 0.25) 100%);
+  pointer-events: none;
+}
+
+/* 3D Three.js WebGL Canvas Container */
+.aavriti-canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background: transparent;
+  cursor: grab;
+}
+
+.aavriti-canvas-container:active {
+  cursor: grabbing;
+}
+
+.aavriti-canvas-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* UI Overlay Layout Layer */
+.aavriti-ui-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Header / Minimal Navbar */
+.aavriti-navbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.2rem 6.5% 0.8rem 6.5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: auto;
+  z-index: 20;
+}
+
+.aavriti-menu-btn {
+  background: none;
+  border: none;
+  color: var(--aavriti-text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.aavriti-menu-btn:hover {
+  opacity: 0.6;
+  transform: scale(1.05);
+}
+
+/* Center Brand Logo */
+.aavriti-brand-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  z-index: 25;
+}
+
+.aavriti-logo-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.aavriti-logo-link:hover {
+  opacity: 0.75;
+  transform: scale(1.02);
+}
+
+.aavriti-brand-logo {
+  height: 56px;
+  width: auto;
+  max-width: 150px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Top Right Actions */
+.aavriti-navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 2.2rem;
+}
+
+.aavriti-nav-icon-btn {
+  background: none;
+  border: none;
+  color: var(--aavriti-text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem;
+  transition: opacity 0.2s ease;
+}
+
+.aavriti-nav-icon-btn:hover {
+  opacity: 0.6;
+}
+
+.aavriti-nav-text-btn {
+  background: none;
+  border: none;
+  color: var(--aavriti-text-primary);
+  font-family: var(--aavriti-font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  padding: 0.3rem 0;
+  transition: opacity 0.2s ease;
+}
+
+.aavriti-nav-text-btn:hover {
+  opacity: 0.6;
+}
+
+.aavriti-cart-btn {
+  background: none;
+  border: none;
+  color: var(--aavriti-text-primary);
+  font-family: var(--aavriti-font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.2rem;
+  transition: opacity 0.2s ease;
+}
+
+.aavriti-cart-btn:hover {
+  opacity: 0.6;
+}
+
+.aavriti-cart-pill {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background-color: var(--aavriti-text-primary);
+  color: #ffffff;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  line-height: 1.15rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.3rem;
+  transition: transform 0.2s ease;
+}
+
+/* Editorial Left Information Block */
+.aavriti-editorial-info {
+  position: absolute;
+  top: 48%;
+  left: 6.5%;
+  transform: translateY(-50%);
+  max-width: 320px;
+  pointer-events: auto;
+  z-index: 15;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.aavriti-editorial-category {
+  font-size: 0.70rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #4a4a4a;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+  display: block;
+}
+
+.aavriti-editorial-title {
+  font-family: var(--aavriti-font-sans);
+  font-size: 2.8rem;
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--aavriti-text-primary);
+  text-transform: uppercase;
+  margin: 0 0 1.2rem 0;
+  word-break: break-word;
+}
+
+.aavriti-editorial-description {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: #555555;
+  margin: 0 0 1.5rem 0;
+  max-width: 290px;
+}
+
+.aavriti-editorial-price {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--aavriti-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.aavriti-em-dash {
+  font-weight: 300;
+  color: #888888;
+}
+
+/* Bottom Left Social Community */
+.aavriti-social-community {
+  position: absolute;
+  bottom: 2.2rem;
+  left: 6.5%;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  z-index: 15;
+}
+
+.aavriti-social-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #777777;
+}
+
+.aavriti-social-links {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+}
+
+.aavriti-social-links a {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--aavriti-text-primary);
+  text-decoration: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.aavriti-social-links a:hover {
+  opacity: 0.6;
+  transform: translateY(-1px);
+}
+
+/* Middle Right Controls & Add to Cart */
+.aavriti-controls-right {
+  position: absolute;
+  top: 50%;
+  right: 6.5%;
+  transform: translateY(-50%);
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 3.5rem;
+  z-index: 15;
+}
+
+/* Carousel Slider Nav (< — >) */
+.aavriti-slider-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.aavriti-slider-arrow {
+  background: none;
+  border: none;
+  color: var(--aavriti-text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.aavriti-slider-arrow:hover {
+  opacity: 0.5;
+  transform: scale(1.15);
+}
+
+.aavriti-slider-track {
+  width: 3.5rem;
+  height: 2px;
+  background-color: rgba(0, 0, 0, 0.16);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.aavriti-slider-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background-color: var(--aavriti-text-primary);
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Add to Cart Button */
+.aavriti-add-cart-btn {
+  background: none;
+  border: none;
+  font-family: var(--aavriti-font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--aavriti-text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.4rem;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.aavriti-add-cart-btn:hover {
+  opacity: 0.6;
+  transform: translateX(2px);
+}
+
+/* Bottom Right Language Selector */
+.aavriti-lang-select {
+  position: absolute;
+  bottom: 2.2rem;
+  right: 6.5%;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--aavriti-text-primary);
+  cursor: pointer;
+  z-index: 15;
+}
+
+.aavriti-lang-select:hover {
+  opacity: 0.6;
+}
+
+/* Quick Toast Notification when item added to Shopify cart */
+.aavriti-toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background-color: #121212;
+  color: #ffffff;
+  padding: 0.85rem 1.4rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.aavriti-toast.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1024px) {
+  .aavriti-editorial-title {
+    font-size: 2.2rem;
+  }
+  .aavriti-controls-right {
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .aavriti-navbar {
+    padding: 1rem 5%;
+  }
+
+  .aavriti-brand-logo {
+    height: 42px;
+    max-width: 110px;
+  }
+
+  .aavriti-navbar-right {
+    gap: 1.2rem;
+  }
+
+  .aavriti-nav-text-btn {
+    display: none;
+  }
+
+  .aavriti-editorial-info {
+    top: auto;
+    bottom: 5.5rem;
+    left: 5%;
+    transform: none;
+    max-width: 85%;
+  }
+
+  .aavriti-editorial-title {
+    font-size: 1.7rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .aavriti-editorial-description {
+    display: none;
+  }
+
+  .aavriti-social-community {
+    display: none;
+  }
+
+  .aavriti-controls-right {
+    top: auto;
+    bottom: 1.6rem;
+    left: 5%;
+    right: 5%;
+    transform: none;
+    justify-content: space-between;
+  }
+
+  .aavriti-lang-select {
+    display: none;
+  }
+}

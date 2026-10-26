@@ -1,0 +1,370 @@
+{% comment %}
+  =============================================================================
+  Aavriti 3D Boutique - Interactive 3D Cloth Animation Section
+  Features:
+  - 3D Interactive Rotating Rack with 4 Wings & Wooden Hangers
+  - Real-time GPU Cloth Wave & Dynamic Wind Effect
+  - Centered Brand Logo (Aavriti Lotus)
+  - Full Shopify Theme Customizer Support (OS 2.0)
+  - Seamless AJAX Cart Integration
+  =============================================================================
+{% endcomment %}
+
+{{ 'aavriti-3d-boutique.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign bg_image_url = 'boutique-bg.png' | asset_url
+  if section.settings.background_image != blank
+    assign bg_image_url = section.settings.background_image | image_url: width: 2400
+  endif
+
+  assign logo_url = 'aavriti-logo.png' | asset_url
+  if section.settings.logo_image != blank
+    assign logo_url = section.settings.logo_image | image_url: width: 600
+  endif
+-%}
+
+<section 
+  id="AavritiSection-{{ section.id }}" 
+  class="aavriti-boutique-section" 
+  data-section-id="{{ section.id }}"
+>
+  <!-- Sunlit Boutique Background Layer -->
+  <div class="aavriti-bg-wrapper">
+    <img 
+      src="{{ bg_image_url }}" 
+      alt="{{ section.settings.background_alt | default: 'Sunlit Minimalist Boutique Interior' | escape }}" 
+      class="aavriti-bg-image" 
+      loading="eager"
+      width="2000"
+      height="1200"
+    />
+    <div class="aavriti-bg-overlay"></div>
+  </div>
+
+  <!-- 3D Three.js WebGL Canvas Layer -->
+  <div class="aavriti-canvas-container"></div>
+
+  <!-- UI Overlay Layer -->
+  <div class="aavriti-ui-layer">
+    <!-- Header / Minimal Navbar -->
+    <header class="aavriti-navbar">
+      <!-- Top Left Menu Icon -->
+      <button class="aavriti-menu-btn" aria-label="Toggle Navigation Menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="8" x2="20" y2="8"></line>
+          <line x1="4" y1="16" x2="20" y2="16"></line>
+        </svg>
+      </button>
+
+      <!-- Center Boutique Brand Logo -->
+      <div class="aavriti-brand-center">
+        <a href="{{ routes.root_url | default: '/' }}" class="aavriti-logo-link" aria-label="{{ shop.name | default: 'Aavriti Boutique' }}">
+          <img 
+            src="{{ logo_url }}" 
+            alt="{{ section.settings.logo_alt | default: 'Aavriti Boutique Lotus Logo' | escape }}" 
+            class="aavriti-brand-logo"
+            style="height: {{ section.settings.logo_height | default: 56 }}px;"
+            loading="eager"
+            width="280"
+            height="140"
+          />
+        </a>
+      </div>
+
+      <!-- Top Right Actions -->
+      <div class="aavriti-navbar-right">
+        <button class="aavriti-nav-icon-btn" aria-label="Search Catalog">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+
+        <a href="{{ routes.account_url | default: '/account' }}" class="aavriti-nav-text-btn">
+          ACCOUNT
+        </a>
+
+        <a href="{{ routes.cart_url | default: '/cart' }}" class="aavriti-cart-btn" aria-label="Shopping Cart">
+          <span>CART</span>
+          <span class="aavriti-cart-pill">{{ cart.item_count | default: 0 }}</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Middle Left Editorial Product Info -->
+    <div class="aavriti-editorial-info">
+      <span class="aavriti-editorial-category"></span>
+      <h1 class="aavriti-editorial-title"></h1>
+      <p class="aavriti-editorial-description"></p>
+      <div class="aavriti-editorial-price">
+        <span class="aavriti-editorial-price-val"></span>
+        <span class="aavriti-em-dash">—</span>
+      </div>
+    </div>
+
+    <!-- Bottom Left Social Links -->
+    <div class="aavriti-social-community">
+      <span class="aavriti-social-label">SOCIAL COMMUNITY:</span>
+      <div class="aavriti-social-links">
+        <a href="{{ section.settings.facebook_url | default: 'https://facebook.com' }}" target="_blank" rel="noopener">FACEBOOK</a>
+        <a href="{{ section.settings.instagram_url | default: 'https://instagram.com' }}" target="_blank" rel="noopener">INSTAGRAM</a>
+        <a href="{{ section.settings.pinterest_url | default: 'https://pinterest.com' }}" target="_blank" rel="noopener">PINTEREST</a>
+      </div>
+    </div>
+
+    <!-- Middle Right Carousel Nav & Add To Cart -->
+    <div class="aavriti-controls-right">
+      <!-- Carousel Slider: < — > -->
+      <div class="aavriti-slider-nav">
+        <button class="aavriti-slider-arrow left" aria-label="Previous garment">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+
+        <div class="aavriti-slider-track">
+          <div class="aavriti-slider-fill" style="width: 25%;"></div>
+        </div>
+
+        <button class="aavriti-slider-arrow right" aria-label="Next garment">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Add To Cart Button -->
+      <button class="aavriti-add-cart-btn" aria-label="Add current garment to cart">
+        <span>ADD TO CART</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Bottom Right Language Selector -->
+    <div class="aavriti-lang-select">
+      <span>ENG</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="aavriti-toast">Added to cart</div>
+</section>
+
+<!-- Product Data JSON for 3D Engine -->
+<script type="application/json" id="AavritiData-{{ section.id }}">
+[
+  {%- for block in section.blocks -%}
+    {%- liquid
+      assign product_obj = block.settings.product
+      assign img_url = 'garment-rains.png' | asset_url
+
+      if block.settings.custom_image != blank
+        assign img_url = block.settings.custom_image | image_url: width: 1400
+      elsif product_obj != blank and product_obj.featured_image != blank
+        assign img_url = product_obj.featured_image | image_url: width: 1400
+      else
+        case forloop.index0
+          when 0
+            assign img_url = 'garment-rains.png' | asset_url
+          when 1
+            assign img_url = 'garment-yellow.png' | asset_url
+          when 2
+            assign img_url = 'garment-red.png' | asset_url
+          when 3
+            assign img_url = 'garment-black.png' | asset_url
+        endcase
+      endif
+
+      assign item_title = block.settings.title | default: product_obj.title | default: "HAUTE COUTURE"
+      assign item_category = block.settings.category | default: product_obj.type | default: "COLLECTION"
+      assign item_fabric = block.settings.fabric | default: "Handcrafted Luxury Fabric"
+      assign item_desc = block.settings.description | default: product_obj.description | strip_html | truncatewords: 24 | default: "Artisanal handcrafted silhouette designed for graceful timeless drape."
+      
+      assign item_price = block.settings.price
+      if item_price == blank and product_obj != blank
+        assign item_price = product_obj.price | money
+      endif
+      if item_price == blank
+        assign item_price = "₹ 2,499"
+      endif
+
+      assign variant_id = ""
+      if product_obj != blank and product_obj.first_available_variant != blank
+        assign variant_id = product_obj.first_available_variant.id
+      endif
+    -%}
+    {
+      "id": {{ block.id | json }},
+      "category": {{ item_category | json }},
+      "title": {{ item_title | json }},
+      "fabric": {{ item_fabric | json }},
+      "price": {{ item_price | json }},
+      "description": {{ item_desc | json }},
+      "image": {{ img_url | json }},
+      "variantId": {{ variant_id | json }}
+    }{%- unless forloop.last -%},{%- endunless -%}
+  {%- endfor -%}
+]
+</script>
+
+{{ 'aavriti-3d-boutique.js' | asset_url | script_tag }}
+
+{% schema %}
+{
+  "name": "Aavriti 3D Boutique",
+  "tag": "section",
+  "class": "section-aavriti-3d-boutique",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Boutique Branding & Interior"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_image",
+      "label": "Brand Logo (Aavriti Lotus)",
+      "info": "Upload the transparent Aavriti lotus logo"
+    },
+    {
+      "type": "range",
+      "id": "logo_height",
+      "min": 32,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "label": "Logo Height (Desktop)",
+      "default": 56
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Boutique Background Interior",
+      "info": "High-res sunlit boutique interior image"
+    },
+    {
+      "type": "header",
+      "content": "Social Community Links"
+    },
+    {
+      "type": "url",
+      "id": "facebook_url",
+      "label": "Facebook URL"
+    },
+    {
+      "type": "url",
+      "id": "instagram_url",
+      "label": "Instagram URL"
+    },
+    {
+      "type": "url",
+      "id": "pinterest_url",
+      "label": "Pinterest URL"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "garment_slide",
+      "name": "Garment Wing",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Link to Shopify Product",
+          "info": "Select a product to automatically link inventory and pricing"
+        },
+        {
+          "type": "text",
+          "id": "category",
+          "label": "Category Tag",
+          "default": "ANARKALI"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Garment Title",
+          "default": "CRIMSON RED"
+        },
+        {
+          "type": "text",
+          "id": "fabric",
+          "label": "Fabric Spec",
+          "default": "Royal Chanderi Silk"
+        },
+        {
+          "type": "text",
+          "id": "price",
+          "label": "Display Price",
+          "default": "₹ 3,299"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Editorial Description",
+          "default": "Rich crimson red traditional flared gown crafted with subtle metallic embroidery and matching inner layer."
+        },
+        {
+          "type": "image_picker",
+          "id": "custom_image",
+          "label": "Garment Cutout PNG",
+          "info": "Transparent PNG cutout of the dress hanging on hanger"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Aavriti 3D Boutique",
+      "blocks": [
+        {
+          "type": "garment_slide",
+          "settings": {
+            "category": "JACKET",
+            "title": "RAINS",
+            "fabric": "Waterproof Polyurethane",
+            "price": "₹ 2,499",
+            "description": "The classic long rain jacket of the Danish brand Rains, modeled on the legendary M-51 parka silhouette."
+          }
+        },
+        {
+          "type": "garment_slide",
+          "settings": {
+            "category": "KURTI",
+            "title": "SUNFLOWER YELLOW",
+            "fabric": "Pure Linen Cotton",
+            "price": "₹ 1,899",
+            "description": "Vibrant mustard yellow handcrafted tunic featuring fine threadwork and light breathable summer weave."
+          }
+        },
+        {
+          "type": "garment_slide",
+          "settings": {
+            "category": "ANARKALI",
+            "title": "CRIMSON RED",
+            "fabric": "Royal Chanderi Silk",
+            "price": "₹ 3,299",
+            "description": "Rich crimson red traditional flared gown crafted with subtle metallic embroidery and matching inner layer."
+          }
+        },
+        {
+          "type": "garment_slide",
+          "settings": {
+            "category": "KURTA",
+            "title": "MIDNIGHT BLACK",
+            "fabric": "Premium Raw Silk",
+            "price": "₹ 2,199",
+            "description": "Sleek obsidian black silhouette featuring structured tailored fit and minimal modern finish."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
