@@ -1,32 +1,88 @@
-# React + TypeScript + Vite
+# 3D Boutique — White-Label Immersive Storefront
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+An immersive, single-screen 3D boutique experience: a rotating garment rack
+with a hand-written GPU cloth shader (wind, billow, hem flutter), editorial
+overlay UI, and an optional live Shopify checkout.
 
-Currently, two official plugins are available:
+Built to be **re-skinned per client from a single config file** — no component
+changes needed to launch a new boutique.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Stack: **Vite · React 19 · TypeScript · react-three-fiber / Three.js · Shopify Storefront API**
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Launching a new client
 
-## Expanding the Oxlint configuration
+Each client is **one config file** + **one deployment**.
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+1. Copy `src/config/clients/aavriti.ts` → `src/config/clients/<client>.ts`.
+2. Edit the brand, theme (colors + fonts), socials, and the 4 garment slots
+   (cutout PNG texture + copy, and optionally a Shopify product handle).
+3. Register it in `src/config/index.ts` under its `id`.
+4. Set `VITE_CLIENT=<client>` on the deployment (Vercel env var).
+5. Deploy. Done.
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+Everything white-labels at runtime: CSS variables, fonts, favicon, `<title>`,
+and Open Graph meta are applied from the config by `applyClientConfig()`.
+
+## Commerce (optional, graceful fallback)
+
+If Shopify env vars are present, products are enriched with **live price /
+availability**, "Add to cart" uses the **Shopify Cart API**, and checkout opens
+the **hosted Shopify checkout**. If they're absent, the app runs in a polished
+**demo cart** mode (checkout disabled, clearly labeled) — so a client site works
+before commerce is wired up.
+
+Set these per deployment (see `.env.example`):
+
+| Variable | Required | Purpose |
+|---|---|---|
+| `VITE_CLIENT` | no (defaults to `aavriti`) | Which client config to build |
+| `VITE_SHOPIFY_DOMAIN` | for live commerce | `your-store.myshopify.com` |
+| `VITE_SHOPIFY_STOREFRONT_TOKEN` | for live commerce | Public Storefront API token (safe client-side) |
+| `VITE_SHOPIFY_API_VERSION` | no (defaults to `2024-10`) | Storefront API version |
+| `VITE_SHOPIFY_COLLECTION_HANDLE` | no | Source products from a collection |
+
+To link garment slots to real products, set `shopifyHandle` on each garment in
+the client config.
+
+## Architecture
+
+```
+src/
+  config/
+    types.ts            Config contract (ClientConfig, GarmentSlot, ...)
+    index.ts            Client registry + env resolution (config, hasLiveCommerce)
+    clients/aavriti.ts  Reference client config
+  lib/
+    shopify.ts          Storefront API client (products + Cart API)
+    cart.tsx            CartProvider / useCart — Shopify or demo fallback
+    theme.ts            applyClientConfig — CSS vars, fonts, favicon, SEO meta
+    useIsMobile.ts      Shared responsive hook
+  components/
+    Scene.tsx           3D rack + GPU cloth shader (lazy-loaded)
+    ProductInfo.tsx     Editorial copy, price, add-to-cart
+    Navbar.tsx          Brand + cart entry
+    CartDrawer.tsx      Line items, quantity, checkout
+    ErrorBoundary.tsx   WebGL failure fallback
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Performance: the Three.js scene is **code-split** and lazy-loaded, so the shell
+and background paint first (~77 KB gzip initial JS vs ~247 KB for the deferred
+3D chunk). Device pixel ratio is clamped to 2 and shader materials are disposed
+on unmount.
+
+## Shopify theme port
+
+`shopify/` contains a standalone Shopify Liquid (OS 2.0) port of the same
+experience for merchants who want it embedded in a Shopify theme directly. See
+`shopify/README_SHOPIFY.md`.
+
+## Scripts
+
+```bash
+npm run dev       # local dev server
+npm run build     # type-check + production build
+npm run preview   # serve the production build
+npm run lint      # oxlint
+```

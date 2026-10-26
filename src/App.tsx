@@ -1,47 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { Navbar } from './components/Navbar';
-import { Scene } from './components/Scene';
 import { ProductInfo } from './components/ProductInfo';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { config } from './config';
+
+// Code-split the Three.js scene: the heavy 3D bundle loads after the shell
+// paints, so first contentful paint isn't blocked by WebGL libraries.
+const Scene = lazy(() =>
+  import('./components/Scene').then((m) => ({ default: m.Scene })),
+);
+
+// The rack has a fixed number of wings; each quarter-turn presents the next.
+const WINGS = config.garments.length;
+const QUARTER_TURN = Math.PI / 2;
+
+/** Map a continuous Y-rotation to the 0..WINGS-1 garment currently facing front. */
+function rotationToIndex(rotationY: number): number {
+  const steps = Math.round(-rotationY / QUARTER_TURN);
+  return ((steps % WINGS) + WINGS * 2) % WINGS;
+}
+
+const textures = config.garments.map((g) => g.texture);
 
 export const App: React.FC = () => {
   const [targetRotationY, setTargetRotationY] = useState(0);
-  const [cartCount, setCartCount] = useState(0);
+  const activeIndex = rotationToIndex(targetRotationY);
 
-  // Calculate activeIndex here to pass it to ProductInfo
-  const activeIndex = (((Math.round(-targetRotationY / (Math.PI / 2))) % 4) + 6) % 4;
+  const handleRotateLeft = () =>
+    setTargetRotationY((prev) => prev + QUARTER_TURN);
+  const handleRotateRight = () =>
+    setTargetRotationY((prev) => prev - QUARTER_TURN);
 
-  const handleRotateLeft = () => {
-    setTargetRotationY((prev) => prev + Math.PI / 2);
-  };
-
-  const handleRotateRight = () => {
-    setTargetRotationY((prev) => prev - Math.PI / 2);
-  };
-
-  const handleAddToCart = () => {
-    setCartCount((prev) => prev + 1);
-  };
-
-  // Keyboard shortcut listener for Left and Right Arrow keys
+  // Keyboard navigation (Left / Right arrows).
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') {
-        handleRotateLeft();
-      } else if (e.key === 'ArrowRight') {
-        handleRotateRight();
-      }
+      if (e.key === 'ArrowLeft') handleRotateLeft();
+      else if (e.key === 'ArrowRight') handleRotateRight();
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Swipe / Drag Gestures for both touch and desktop mouse
-  const pointerStartX = React.useRef<number | null>(null);
-  const pointerMoved = React.useRef(false);
+  // Swipe / drag navigation for touch and mouse.
+  const pointerStartX = useRef<number | null>(null);
+  const pointerMoved = useRef(false);
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    // Avoid triggering drag navigation when clicking buttons or interactive links
     if ((e.target as HTMLElement).closest('button, a, input, select')) return;
     pointerStartX.current = e.clientX;
     pointerMoved.current = false;
@@ -57,51 +61,52 @@ export const App: React.FC = () => {
   const handlePointerUp = (e: React.PointerEvent) => {
     if (pointerStartX.current === null) return;
     const diffX = pointerStartX.current - e.clientX;
-
-    // Threshold of 35px for slide gesture
     if (Math.abs(diffX) > 35 && pointerMoved.current) {
-      if (diffX > 0) {
-        handleRotateRight(); // Dragged left -> next garment
-      } else {
-        handleRotateLeft();  // Dragged right -> prev garment
-      }
+      if (diffX > 0) handleRotateRight();
+      else handleRotateLeft();
     }
     pointerStartX.current = null;
     pointerMoved.current = false;
   };
 
+  const resetPointer = () => {
+    pointerStartX.current = null;
+    pointerMoved.current = false;
+  };
+
   return (
-    <main 
+    <main
       className="boutique-main-section"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      onPointerCancel={() => {
-        pointerStartX.current = null;
-        pointerMoved.current = false;
-      }}
+      onPointerCancel={resetPointer}
     >
-      {/* Sunlit Minimalist Boutique Interior Background Layer */}
+      {/* Boutique Interior Background Layer */}
       <div className="boutique-bg-wrapper">
-        <img 
-          src="/boutique-bg.png" 
-          alt="Sunlit Minimalist Boutique Interior" 
-          className="boutique-bg-image" 
+        <img
+          src={config.brand.backgroundSrc}
+          alt=""
+          className="boutique-bg-image"
+          fetchPriority="high"
         />
         <div className="boutique-bg-overlay" />
       </div>
 
       {/* 3D Three.js Canvas Layer */}
-      <Scene targetRotationY={targetRotationY} />
+      <ErrorBoundary>
+        <Suspense fallback={<div className="scene-loading" aria-hidden="true" />}>
+          <Scene targetRotationY={targetRotationY} textures={textures} />
+        </Suspense>
+      </ErrorBoundary>
 
       {/* UI Overlay Layer */}
       <div className="ui-layer">
-        <Navbar cartCount={cartCount} />
-        <ProductInfo 
-          activeIndex={activeIndex} 
-          onRotateLeft={handleRotateLeft} 
-          onRotateRight={handleRotateRight} 
-          onAddToCart={handleAddToCart}
+        <Navbar />
+        <ProductInfo
+          activeIndex={activeIndex}
+          onRotateLeft={handleRotateLeft}
+          onRotateRight={handleRotateRight}
         />
       </div>
     </main>

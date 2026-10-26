@@ -1,7 +1,8 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, useTexture, ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
+import { useIsMobile } from '../lib/useIsMobile';
 
 // Custom Cloth Wave & Wind Shader
 const clothVertexShader = `
@@ -130,20 +131,22 @@ interface HangingGarmentProps {
   }>;
 }
 
-const GarmentItem: React.FC<HangingGarmentProps> = ({ 
-  textureUrl, 
-  index, 
-  isPresented, 
+const GarmentItem: React.FC<HangingGarmentProps> = ({
+  textureUrl,
+  index,
+  isPresented,
   isMobile,
   windState
 }) => {
   const texture = useTexture(textureUrl);
-  texture.colorSpace = THREE.SRGBColorSpace;
   const swingRef = useRef<THREE.Group>(null);
   const materialRef = useRef<THREE.ShaderMaterial>(null);
 
   // Create custom shader material for waving cloth
   const clothMaterial = useMemo(() => {
+    texture.colorSpace = THREE.SRGBColorSpace;
+    // Crisper fabric edges when the rack is angled, without heavy cost.
+    texture.anisotropy = 4;
     return new THREE.ShaderMaterial({
       uniforms: {
         uMap: { value: texture },
@@ -159,6 +162,10 @@ const GarmentItem: React.FC<HangingGarmentProps> = ({
       depthWrite: true,
     });
   }, [texture]);
+
+  // Free GPU memory when this garment unmounts (prevents shader leaks on
+  // hot-reload and when the rack is torn down).
+  useEffect(() => () => clothMaterial.dispose(), [clothMaterial]);
 
   // Subtle natural hanging sway motion, inertial tilt from sliding, and scale animation
   useFrame((state, delta) => {
@@ -219,9 +226,11 @@ const GarmentItem: React.FC<HangingGarmentProps> = ({
 interface StandProps {
   targetRotationY: number;
   isMobile?: boolean;
+  /** Garment cutout textures, one per wing (expects 4). */
+  textures: string[];
 }
 
-const StandWithFlaredWings: React.FC<StandProps> = ({ targetRotationY, isMobile }) => {
+const StandWithFlaredWings: React.FC<StandProps> = ({ targetRotationY, isMobile, textures }) => {
   const groupRef = useRef<THREE.Group>(null);
   const apexY = 1.1;
   const legHeight = 3.4;
@@ -352,9 +361,9 @@ const StandWithFlaredWings: React.FC<StandProps> = ({ targetRotationY, isMobile 
             rotation={[0, Math.PI / 2, 0]}
           >
             <React.Suspense fallback={null}>
-              <GarmentItem 
-                textureUrl={['/garment.png', '/yellow.png', '/red.png', '/black.png'][index]} 
-                index={index} 
+              <GarmentItem
+                textureUrl={textures[index] ?? textures[0]}
+                index={index}
                 isPresented={activeIndex === index}
                 isMobile={isMobile}
                 windState={windState}
@@ -370,36 +379,31 @@ const StandWithFlaredWings: React.FC<StandProps> = ({ targetRotationY, isMobile 
 
 interface SceneProps {
   targetRotationY: number;
+  /** Garment cutout textures, one per wing (expects 4). */
+  textures: string[];
 }
 
-export const Scene: React.FC<SceneProps> = ({ targetRotationY }) => {
-  const [isMobile, setIsMobile] = React.useState(
-    typeof window !== 'undefined' ? window.innerWidth <= 768 : false
-  );
-
-  React.useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+export const Scene: React.FC<SceneProps> = ({ targetRotationY, textures }) => {
+  const isMobile = useIsMobile();
 
   return (
     <div className="canvas-container">
       <Canvas
-        camera={{ 
-          position: isMobile ? [0, 0.9, 6.0] : [0, 1.4, 5.0], 
-          fov: isMobile ? 48 : 45 
+        // Clamp device pixel ratio: retina phones otherwise render at 3x,
+        // tripling fragment-shader cost for no visible gain here.
+        dpr={[1, 2]}
+        camera={{
+          position: isMobile ? [0, 0.9, 6.0] : [0, 1.4, 5.0],
+          fov: isMobile ? 48 : 45
         }}
-        gl={{ antialias: true, alpha: true }}
+        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       >
         <ambientLight intensity={1.1} color="#fffcf5" />
         <directionalLight position={[-7, 10, 5]} intensity={1.6} color="#fffaf0" />
         <directionalLight position={[6, 4, 3]} intensity={0.6} color="#ffffff" />
 
         {/* 1 Central Stand with 4 Flared Wings & Hanging Garments */}
-        <StandWithFlaredWings targetRotationY={targetRotationY} isMobile={isMobile} />
+        <StandWithFlaredWings targetRotationY={targetRotationY} isMobile={isMobile} textures={textures} />
 
         {/* Soft floor contact shadow to anchor rack to boutique floor */}
         <ContactShadows 
